@@ -1,4 +1,4 @@
 hostname,ip,os,username
 web01,192.168.1.10,ubuntu,ubuntu
-web02,192.168.1.11,ubuntu,ubuntu
 db01,192.168.1.12,oraclelinux,ec2-user
+web02,18.220.179.40,ubuntu,ubuntu
