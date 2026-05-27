@@ -8,17 +8,17 @@
 
   tasks:
 
-    - name: Update apt cache
-      shell: |
-        apt update --allow-releaseinfo-change
-      args:
-        warn: false
-      when: ansible_os_family == "Debian"
-    - name: Remove broken PostgreSQL repo
-      file:
-        path: /etc/apt/sources.list.d/pgdg.list
-        state: absent
-      ignore_errors: yes
+    # - name: Update apt cache
+    #   shell: |
+    #     apt update --allow-releaseinfo-change
+    #   args:
+    #     warn: false
+    #   when: ansible_os_family == "Debian"
+    # - name: Remove broken PostgreSQL repo
+    #   file:
+    #     path: /etc/apt/sources.list.d/pgdg.list
+    #     state: absent
+    #   ignore_errors: yes
 
     - name: Install Zabbix Agent on Debian/Ubuntu
       apt:
