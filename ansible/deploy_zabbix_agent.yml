@@ -1,1 +1,61 @@
+---
+- name: Deploy Zabbix Agent
+  hosts: zabbix_agents
+  become: yes
 
+  vars:
+    zabbix_package: zabbix-agent
+
+  tasks:
+
+    - name: Update apt cache
+      apt:
+        update_cache: yes
+      when: ansible_os_family == "Debian"
+
+    - name: Install Zabbix Agent on Debian/Ubuntu
+      apt:
+        name: "{{ zabbix_package }}"
+        state: present
+      when: ansible_os_family == "Debian"
+
+    - name: Install Zabbix Agent on RedHat/Oracle Linux
+      yum:
+        name: "{{ zabbix_package }}"
+        state: present
+      when: ansible_os_family == "RedHat"
+
+    - name: Configure Zabbix Server
+      lineinfile:
+        path: /etc/zabbix/zabbix_agentd.conf
+        regexp: '^Server='
+        line: "Server={{ zabbix_server_ip }}"
+
+    - name: Configure Active Server
+      lineinfile:
+        path: /etc/zabbix/zabbix_agentd.conf
+        regexp: '^ServerActive='
+        line: "ServerActive={{ zabbix_server_ip }}"
+
+    - name: Configure Hostname
+      lineinfile:
+        path: /etc/zabbix/zabbix_agentd.conf
+        regexp: '^Hostname='
+        line: "Hostname={{ inventory_hostname }}"
+
+    - name: Enable Zabbix Agent
+      service:
+        name: zabbix-agent
+        enabled: yes
+
+    - name: Restart Zabbix Agent
+      service:
+        name: zabbix-agent
+        state: restarted
+
+    - name: Verify Agent Status
+      service_facts:
+
+    - name: Print Status
+      debug:
+        msg: "Zabbix Agent is running on {{ inventory_hostname }}"
