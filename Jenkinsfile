@@ -10,16 +10,6 @@ pipeline {
 
     stages {
 
-        stage('Checkout Repository') {
-
-            steps {
-
-                git branch: 'main',
-                    credentialsId: 'github-ssh',
-                    url: 'git@github.com:YOUR_GITHUB_USERNAME/zabbix-agent-deployment.git'
-            }
-        }
-
         stage('Validate CSV') {
 
             steps {
