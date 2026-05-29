@@ -42,7 +42,29 @@ pipeline {
                 '''
 
                 sh '''
+                echo "Generated Inventory:"
                 cat ansible/inventory.ini
+                '''
+            }
+        }
+
+        stage('Update Known Hosts') {
+
+            steps {
+
+                sh '''
+                mkdir -p ~/.ssh
+                touch ~/.ssh/known_hosts
+
+                for ip in $(grep ansible_host ansible/inventory.ini | awk -F'ansible_host=' '{print $2}' | awk '{print $1}')
+                do
+                    echo "Processing $ip"
+
+                    ssh-keyscan -H $ip >> ~/.ssh/known_hosts 2>/dev/null || true
+                done
+
+                chmod 700 ~/.ssh
+                chmod 644 ~/.ssh/known_hosts
                 '''
             }
         }
@@ -88,6 +110,14 @@ pipeline {
         failure {
 
             echo 'Deployment failed'
+        }
+
+        always {
+
+            sh '''
+            echo "Current known_hosts entries:"
+            wc -l ~/.ssh/known_hosts || true
+            '''
         }
     }
 }
