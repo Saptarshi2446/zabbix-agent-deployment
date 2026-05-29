@@ -1,139 +1,92 @@
----
-
 - name: Deploy Zabbix Agent
   hosts: zabbix_agents
-  become: yes
-
+  become: 'yes'
   vars:
     zabbix_package: zabbix-agent
-
   tasks:
-
-  ###################################################################
-
-  # LAYER 1 - CHECK INSTALLATION STATUS
-
-  ###################################################################
-
-  - name: Gather package facts
-    package_facts:
-    manager: auto
-
-  - name: Gather service facts
-    service_facts:
-
-  ###################################################################
-
-  # LAYER 2 - AGENT INSTALLED AND RUNNING
-
-  ###################################################################
-
-  - name: Agent installed and running
-    block:
-
-    - name: Print status
-      debug:
-        msg: "Zabbix Agent is already installed and running on {{ inventory_hostname }}"
-
-    - name: Stop processing this host
-      meta: end_host
-
-    when:
-
-    - zabbix_package in ansible_facts.packages
-    - "'zabbix-agent.service' in ansible_facts.services"
-    - ansible_facts.services['zabbix-agent.service'].state == 'running'
-
-  ###################################################################
-
-  # LAYER 3 - AGENT INSTALLED BUT STOPPED
-
-  ###################################################################
-
-  - name: Agent installed but stopped
-    block:
-
-    - name: Print status
-      debug:
-      msg: "Zabbix Agent is installed but stopped on {{ inventory_hostname }}"
-
-    - name: Start Zabbix Agent service
-      service:
-        name: zabbix-agent
-        state: started
-        enabled: yes
-
-    - name: Refresh service facts
-      service_facts:
-
-    - name: Print final status
-      debug:
-      msg: "Zabbix Agent service started successfully on {{ inventory_hostname }}"
-
-    - name: Stop processing this host
-      meta: end_host
-
-    when:
-
-    - zabbix_package in ansible_facts.packages
-    - "'zabbix-agent.service' not in ansible_facts.services or ansible_facts.services['zabbix-agent.service'].state != 'running'"
-
-  ###################################################################
-
-  # LAYER 4 - AGENT NOT INSTALLED
-
-  ###################################################################
-
-  - name: Install and configure Zabbix Agent
-    block:
-
-    - name: Install Zabbix Agent on Debian/Ubuntu
-      apt:
-        name: "{{ zabbix_package }}"
-        state: present
-      when: ansible_os_family == "Debian"
-
-    - name: Install Zabbix Agent on RedHat/Oracle Linux
-      yum:
-        name: "{{ zabbix_package }}"
-        state: present
-      when: ansible_os_family == "RedHat"
-
-    - name: Configure Zabbix Server
-      lineinfile:
-      path: /etc/zabbix/zabbix_agentd.conf
-      regexp: '^Server='
-      line: "Server={{ zabbix_server_ip }}"
-
-    - name: Configure Active Server
-      lineinfile:
-      path: /etc/zabbix/zabbix_agentd.conf
-      regexp: '^ServerActive='
-      line: "ServerActive={{ zabbix_server_ip }}"
-
-    - name: Configure Hostname
-      lineinfile:
-      path: /etc/zabbix/zabbix_agentd.conf
-      regexp: '^Hostname='
-      line: "Hostname={{ inventory_hostname }}"
-
-    - name: Enable Zabbix Agent service
-      service:
-        name: zabbix-agent
-        enabled: yes
-
-    - name: Start Zabbix Agent service
-      service:
-        name: zabbix-agent
-        state: started
-
-    - name: Refresh service facts
-      service_facts:
-
-    - name: Print success message
-      debug:
-      msg: "Zabbix Agent installed, configured and started successfully on {{ inventory_hostname }}"
-
-    when:
-
-    - zabbix_package not in ansible_facts.packages
+    - name: Gather package facts
+      package_facts: null
+      manager: auto
+    - name: Gather service facts
+      service_facts: null
+    - name: Agent installed and running
+      block:
+        - name: Print status
+          debug:
+            msg: >-
+              Zabbix Agent is already installed and running on {{
+              inventory_hostname }}
+        - name: Stop processing this host
+          meta: end_host
+      when:
+        - zabbix_package in ansible_facts.packages
+        - '''zabbix-agent.service'' in ansible_facts.services'
+        - 'ansible_facts.services[''zabbix-agent.service''].state == ''running'''
+    - name: Agent installed but stopped
+      block:
+        - name: Print status
+          debug: null
+          msg: 'Zabbix Agent is installed but stopped on {{ inventory_hostname }}'
+        - name: Start Zabbix Agent service
+          service:
+            name: zabbix-agent
+            state: started
+            enabled: 'yes'
+        - name: Refresh service facts
+          service_facts: null
+        - name: Print final status
+          debug: null
+          msg: >-
+            Zabbix Agent service started successfully on {{ inventory_hostname
+            }}
+        - name: Stop processing this host
+          meta: end_host
+      when:
+        - zabbix_package in ansible_facts.packages
+        - >-
+          'zabbix-agent.service' not in ansible_facts.services or
+          ansible_facts.services['zabbix-agent.service'].state != 'running'
+    - name: Install and configure Zabbix Agent
+      block:
+        - name: Install Zabbix Agent on Debian/Ubuntu
+          apt:
+            name: '{{ zabbix_package }}'
+            state: present
+          when: ansible_os_family == "Debian"
+        - name: Install Zabbix Agent on RedHat/Oracle Linux
+          yum:
+            name: '{{ zabbix_package }}'
+            state: present
+          when: ansible_os_family == "RedHat"
+        - name: Configure Zabbix Server
+          lineinfile: null
+          path: /etc/zabbix/zabbix_agentd.conf
+          regexp: ^Server=
+          line: 'Server={{ zabbix_server_ip }}'
+        - name: Configure Active Server
+          lineinfile: null
+          path: /etc/zabbix/zabbix_agentd.conf
+          regexp: ^ServerActive=
+          line: 'ServerActive={{ zabbix_server_ip }}'
+        - name: Configure Hostname
+          lineinfile: null
+          path: /etc/zabbix/zabbix_agentd.conf
+          regexp: ^Hostname=
+          line: 'Hostname={{ inventory_hostname }}'
+        - name: Enable Zabbix Agent service
+          service:
+            name: zabbix-agent
+            enabled: 'yes'
+        - name: Start Zabbix Agent service
+          service:
+            name: zabbix-agent
+            state: started
+        - name: Refresh service facts
+          service_facts: null
+        - name: Print success message
+          debug: null
+          msg: >-
+            Zabbix Agent installed, configured and started successfully on {{
+            inventory_hostname }}
+      when:
+        - zabbix_package not in ansible_facts.packages
