@@ -86,31 +86,47 @@ pipeline {
 
         stage('Deploy Zabbix Agent') {
 
-            steps {
+        ```
+        steps {
+
+            script {
 
                 sshagent(credentials: ['ansible-ssh-key']) {
 
-                    sh '''
-                    ansible-playbook \
-                      -i ansible/inventory.ini \
-                      ansible/deploy_zabbix_agent.yml
-                    '''
+                    def ansibleOutput = sh(
+                        script: '''
+                        ansible-playbook \
+                          -i ansible/inventory.ini \
+                          ansible/deploy_zabbix_agent.yml
+                        ''',
+                        returnStdout: true
+                    ).trim()
+
+                    echo ansibleOutput
+
+                    if (ansibleOutput.contains("already installed and running")) {
+
+                        echo "STATUS: Agent already installed and running on one or more hosts"
+                    }
+
+                    if (ansibleOutput.contains("installed but stopped")) {
+
+                        echo "STATUS: Agent was installed but service was stopped and has been started"
+                    }
+
+                    if (ansibleOutput.contains("installed, configured and started")) {
+
+                        echo "STATUS: New Zabbix Agent installation completed"
+                    }
                 }
             }
         }
+        ```
+      }
+
     }
 
     post {
-
-        success {
-
-            echo 'Zabbix Agent deployment completed successfully'
-        }
-
-        failure {
-
-            echo 'Deployment failed'
-        }
 
         always {
 
