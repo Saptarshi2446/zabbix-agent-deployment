@@ -84,45 +84,44 @@ pipeline {
             }
         }
 
-        stage('Deploy Zabbix Agent in Hosts') {
+        stage('Deploy Zabbix Agent') {
 
-        ```
-        steps {
+          steps {
 
-            script {
+              script {
 
-                sshagent(credentials: ['ansible-ssh-key']) {
+                  sshagent(credentials: ['ansible-ssh-key']) {
 
-                    def ansibleOutput = sh(
-                        script: '''
-                        ansible-playbook \
-                          -i ansible/inventory.ini \
-                          ansible/deploy_zabbix_agent.yml
-                        ''',
-                        returnStdout: true
-                    ).trim()
+                      def ansibleOutput = sh(
+                          script: '''
+                          ansible-playbook \
+                            -i ansible/inventory.ini \
+                            ansible/deploy_zabbix_agent.yml
+                          ''',
+                          returnStdout: true
+                      ).trim()
 
-                    echo ansibleOutput
+                      echo ansibleOutput
 
-                    if (ansibleOutput.contains("already installed and running")) {
+                      if (ansibleOutput.contains("already installed and running")) {
 
-                        echo "STATUS: Agent already installed and running on one or more hosts"
-                    }
+                          echo "STATUS: Agent already installed and running on one or more hosts"
+                      }
 
-                    if (ansibleOutput.contains("installed but stopped")) {
+                      if (ansibleOutput.contains("installed but stopped")) {
 
-                        echo "STATUS: Agent was installed but service was stopped and has been started"
-                    }
+                          echo "STATUS: Agent was installed but service was stopped and has been started"
+                      }
 
-                    if (ansibleOutput.contains("installed, configured and started")) {
+                      if (ansibleOutput.contains("installed, configured and started")) {
 
-                        echo "STATUS: New Zabbix Agent installation completed"
-                    }
-                }
-            }
+                          echo "STATUS: New Zabbix Agent installation completed"
+                      }
+                  }
+              }
+          }
+
         }
-        ```
-      }
 
     }
 
