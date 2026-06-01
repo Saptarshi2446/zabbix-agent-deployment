@@ -84,7 +84,7 @@ pipeline {
             }
         }
 
-        stage('Deploy Zabbix Agent') {
+        stage('Deploy Zabbix Agent in Hosts') {
 
         ```
         steps {
