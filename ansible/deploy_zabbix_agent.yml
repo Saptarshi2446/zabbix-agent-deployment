@@ -31,7 +31,7 @@
     block:
       - name: Print status
         debug:
-          msg: "Zabbix Agent is already installed and running on {{ inventory_hostname }}"
+          msg: "HOST_STATUS={{ inventory_hostname }}|INSTALLED_AND_RUNNING"
 
       - name: Stop processing this host
         meta: end_host
@@ -64,7 +64,7 @@
 
       - name: Print final status
         debug:
-          msg: "Zabbix Agent service started successfully on {{ inventory_hostname }}"
+          msg: "HOST_STATUS={{ inventory_hostname }}|SERVICE_STARTED"
 
       - name: Stop processing this host
         meta: end_host
@@ -126,7 +126,7 @@
 
       - name: Print success message
         debug:
-          msg: "Zabbix Agent installed, configured and started successfully on {{ inventory_hostname }}"
+          msg:  "HOST_STATUS={{ inventory_hostname }}|NEW_INSTALL"
 
     when:
       - zabbix_package not in ansible_facts.packages
