@@ -85,44 +85,50 @@ pipeline {
         }
 
         stage('Deploy Zabbix Agent') {
+            steps {
 
-          steps {
+                script {
 
-              script {
+                    sshagent(credentials: ['ansible-ssh-key']) {
 
-                  sshagent(credentials: ['ansible-ssh-key']) {
-
-                    def ansibleOutput = sh(
-                          script: '''
-                          ansible-playbook \
+                        def ansibleOutput = sh(
+                            script: '''
+                            ansible-playbook \
                             -i ansible/inventory.ini \
                             ansible/deploy_zabbix_agent.yml
-                          ''',
-                          returnStdout: true
-                    ).trim()
+                            ''',
+                            returnStdout: true
+                        ).trim()
 
-                    echo ansibleOutput
+                        echo ansibleOutput
 
-                    def runningHosts = []
+                        def runningHosts = []
 
-                    ansibleOutput.eachLine { line ->
+                        for (String line : ansibleOutput.split('\n')) {
 
-                        if (line.contains("already installed and running on")) {
+                            if (line.contains("already installed and running on")) {
 
-                            def matcher = line =~ /running on (.*)"/
+                                def matcher = (line =~ /running on (.*)"/)
 
-                            if (matcher.find()) {
-                                runningHosts.add(matcher.group(1))
+                                if (matcher.find()) {
+
+                                    runningHosts.add(matcher.group(1))
+                                }
                             }
                         }
-                    }
 
-                    if (runningHosts.size() > 0) {
+                        if (!runningHosts.isEmpty()) {
 
-                        echo "STATUS: Agent already installed and running on: ${runningHosts.join(', ')}"
+                            echo "================================="
+                            echo "DEPLOYMENT SUMMARY"
+                            echo "================================="
+                            echo "Installed and Running Hosts:"
+                            echo runningHosts.join(', ')
+                            echo "================================="
+                        }
                     }
                 }
-              }
+            }
           }
 
         }
