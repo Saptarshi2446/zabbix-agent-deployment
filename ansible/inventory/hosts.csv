@@ -1,3 +1,2 @@
 hostname,ip,os,username
-ZbxSrvN3,3.145.216.58,ubuntu,ubuntu
-Vaultstandby,18.221.61.134,ubuntu,ubuntu
+psql_mumbai,15.206.91.127centos,ec2-user
